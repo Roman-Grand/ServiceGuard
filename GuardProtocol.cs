@@ -29,9 +29,21 @@ namespace GuardProtocol
         /// </summary>
         public class DecodeMessage
         {
+            /// <summary>
+            /// 
+            /// </summary>
             public bool MessageProtocol { get; set; } = false;
+            /// <summary>
+            /// 
+            /// </summary>
             public byte[] MessageCropped { get; set; } = null;
+            /// <summary>
+            /// 
+            /// </summary>
             public byte MessageType { get; set; } = 0;
+            /// <summary>
+            /// 
+            /// </summary>
             public short MessageCount { get; set; } = 0;
         }
         /// <summary>
@@ -390,9 +402,9 @@ namespace GuardProtocol
         /// <summary>
         /// Формирование параметров входящего сообщения
         /// </summary>
-        /// <param name="CroppedMessage">Сокращенное входящие сообщение</param>
-        /// <param name="TypeMessage">Флаг типа <see cref="byte"/> для определения типа запроса и формирования исходящего пакета, например: <see langword="0x0a"/>, <see langword="0x06"/>, <see langword="0x0e"/></param>
-        /// <param name="ProtocolNew">Флаг типа <see cref="bool"/> указывающий на актуальнойть версии протокола ( <see langword="true"/> - Актуальная версия, <see langword="false"/> - Старая версия )</param>
+        /// <param name="_CroppedMessage">Сокращенное входящие сообщение</param>
+        /// <param name="_TypeMessage">Флаг типа <see cref="byte"/> для определения типа запроса и формирования исходящего пакета, например: <see langword="0x0a"/>, <see langword="0x06"/>, <see langword="0x0e"/></param>
+        /// <param name="_ProtocolNew">Флаг типа <see cref="bool"/> указывающий на актуальнойть версии протокола ( <see langword="true"/> - Актуальная версия, <see langword="false"/> - Старая версия )</param>
         /// <returns></returns>
         public ResultMessage ReturnMessage(byte[] _CroppedMessage, byte _TypeMessage, bool _ProtocolNew)
         {
@@ -404,9 +416,7 @@ namespace GuardProtocol
             int _Count = 0;
             switch (_TypeMessage)
             {
-                /// <summary>
-                /// Инициализация
-                /// </summary>
+                // Инициализация
                 case 0x0a:
                     ResultMessages.VersionProtocol = _BufferMessage[0];
                     ResultMessages.VersionController = $"{_BufferMessage[1]}.{_BufferMessage[2]}";
@@ -444,9 +454,7 @@ namespace GuardProtocol
                     ResultMessages.LAC = _ProtocolNew ? Encoding.ASCII.GetString(_BufferMessage.GetRange(145, 4).ToArray()) : null;
                     ResultMessages.VersionHW = _ProtocolNew ? $"{Convert.ToInt16(_BufferMessage[149])}.{Convert.ToInt16(_BufferMessage[150])} ver" : null;
                     break;
-                /// <summary>
-                /// Новое сообщение
-                /// </summary>
+                // Новое сообщение
                 case 0x02:
                     ResultMessages.NumberLogJournal = ConvertUInt.ToUInt16(_BufferMessage.GetRange(0, 2).ToArray(), 0);
                     ResultMessages.EventDateTime = $"{DateTime.Parse($"{_BufferMessage[2]}-{_BufferMessage[3]}-{_BufferMessage[4]} {_BufferMessage[5]}:{_BufferMessage[6]}:{_BufferMessage[7]}", new CultureInfo("ru-RU")):dd.MM.yyyy HH:mm:ss}";
@@ -470,9 +478,7 @@ namespace GuardProtocol
                     ResultMessages.Voltage = $"{Convert.ToSingle((decimal)_BufferMessage[27] / 10)} v";
                     ResultMessages.UnknownParameter = _BufferMessage.GetRange(28, 2).ToArray();
                     break;
-                /// <summary>
-                /// Проверка существования открытого соединения
-                /// </summary>
+                // Проверка существования открытого соединения
                 case 0x06:
                     ResultMessages.LevelGSM = _BufferMessage[0] * 32 / 100;
                     ResultMessages.LevelErrorGSM = _BufferMessage[1] * 9 / 100;
@@ -485,9 +491,7 @@ namespace GuardProtocol
                     ResultMessages.Condition12v = new BitArray(new byte[] { _BufferMessage[3] })[5] ? "Напряжение питания ниже допустимого значения" : "Напряжение питания в норме";
                     ResultMessages.Rezerve = _BufferMessage[4];
                     break;
-                /// <summary>
-                /// Таблица интеграции
-                /// </summary>
+                // Таблица интеграции
                 case 0x0e:
                     for (int i = 0; i < _BufferMessage.Count; i++)
                     {
@@ -516,9 +520,7 @@ namespace GuardProtocol
                     }
                     ResultMessages.ListTableIntegration = JsonConvert.SerializeObject(_ListTableIntegration);
                     break;
-                /// <summary>
-                /// Ошибка запроса. ( ошибка CRC, неверная длина пакета )
-                /// </summary>
+                // Ошибка запроса. ( ошибка CRC, неверная длина пакета )
                 case 0xff:
                     ResultMessages = null;
                     break;
@@ -537,9 +539,9 @@ namespace GuardProtocol
         /// <summary>
         /// Формирование параметров входящего сообщения асинхронно
         /// </summary>
-        /// <param name="CroppedMessage">Сокращенное входящие сообщение</param>
-        /// <param name="TypeMessage">Флаг типа <see cref="byte"/> для определения типа запроса и формирования исходящего пакета, например: <see langword="0x0a"/>, <see langword="0x06"/>, <see langword="0x0e"/></param>
-        /// <param name="ProtocolNew">Флаг типа <see cref="bool"/> указывающий на актуальнойть версии протокола ( <see langword="true"/> - Актуальная версия, <see langword="false"/> - Старая версия )</param>
+        /// <param name="_CroppedMessage">Сокращенное входящие сообщение</param>
+        /// <param name="_TypeMessage">Флаг типа <see cref="byte"/> для определения типа запроса и формирования исходящего пакета, например: <see langword="0x0a"/>, <see langword="0x06"/>, <see langword="0x0e"/></param>
+        /// <param name="_ProtocolNew">Флаг типа <see cref="bool"/> указывающий на актуальнойть версии протокола ( <see langword="true"/> - Актуальная версия, <see langword="false"/> - Старая версия )</param>
         /// <returns></returns>
         public async Task<ResultMessage> ReturnMessageAsync(byte[] _CroppedMessage, byte _TypeMessage, bool _ProtocolNew)
         {
@@ -551,9 +553,7 @@ namespace GuardProtocol
             int _Count = 0;
             switch (_TypeMessage)
             {
-                /// <summary>
-                /// Инициализация
-                /// </summary>
+                // Инициализация
                 case 0x0a:
                     ResultMessages.VersionProtocol = _BufferMessage[0];
                     ResultMessages.VersionController = $"{_BufferMessage[1]}.{_BufferMessage[2]}";
@@ -591,9 +591,7 @@ namespace GuardProtocol
                     ResultMessages.LAC = _ProtocolNew ? Encoding.ASCII.GetString(_BufferMessage.GetRange(145, 4).ToArray()) : null;
                     ResultMessages.VersionHW = _ProtocolNew ? $"{Convert.ToInt16(_BufferMessage[149])}.{Convert.ToInt16(_BufferMessage[150])} ver" : null;
                     break;
-                /// <summary>
-                /// Новое сообщение
-                /// </summary>
+                // Новое сообщение
                 case 0x02:
                     ResultMessages.NumberLogJournal = ConvertUInt.ToUInt16(_BufferMessage.GetRange(0, 2).ToArray(), 0);
                     ResultMessages.EventDateTime = $"{DateTime.Parse($"{_BufferMessage[2]}-{_BufferMessage[3]}-{_BufferMessage[4]} {_BufferMessage[5]}:{_BufferMessage[6]}:{_BufferMessage[7]}", new CultureInfo("ru-RU")):dd.MM.yyyy HH:mm:ss}";
@@ -617,9 +615,7 @@ namespace GuardProtocol
                     ResultMessages.Voltage = $"{Convert.ToSingle((decimal)_BufferMessage[27] / 10)} v";
                     ResultMessages.UnknownParameter = _BufferMessage.GetRange(28, 2).ToArray();
                     break;
-                /// <summary>
-                /// Проверка существования открытого соединения
-                /// </summary>
+                // Проверка существования открытого соединения
                 case 0x06:
                     ResultMessages.LevelGSM = _BufferMessage[0] * 32 / 100;
                     ResultMessages.LevelErrorGSM = _BufferMessage[1] * 9 / 100;
@@ -632,9 +628,7 @@ namespace GuardProtocol
                     ResultMessages.Condition12v = new BitArray(new byte[] { _BufferMessage[3] })[5] ? "Напряжение питания ниже допустимого значения" : "Напряжение питания в норме";
                     ResultMessages.Rezerve = _BufferMessage[4];
                     break;
-                /// <summary>
-                /// Таблица интеграции
-                /// </summary>
+                // Таблица интеграции
                 case 0x0e:
                     for (int i = 0; i < _BufferMessage.Count; i++)
                     {
@@ -663,12 +657,11 @@ namespace GuardProtocol
                     }
                     ResultMessages.ListTableIntegration = JsonConvert.SerializeObject(_ListTableIntegration);
                     break;
-                /// <summary>
-                /// Ошибка запроса. ( ошибка CRC, неверная длина пакета )
-                /// </summary>
+                // Ошибка запроса. ( ошибка CRC, неверная длина пакета )
                 case 0xff:
                     ResultMessages = null;
                     break;
+                // Отправить команду
                 case 0x32:
                     ResultMessages.ObjectNumber = ConvertUInt.ToUInt16(_BufferMessage.GetRange(0, 2).ToArray(), 0);
                     ResultMessages.NumberRele = _BufferMessage[2];
@@ -684,10 +677,10 @@ namespace GuardProtocol
         /// <summary>
         /// Формирование ответного пакета
         /// </summary>
-        /// <param name="CroppedMessage">Сокращенное входящие сообщение</param>
-        /// <param name="MessageCount">Цело число, определение под каким номером пуступило входящее сообщение</param>
-        /// <param name="TypeMessage">Флаг типа <see cref="byte"/> для определения типа запроса и формирования исходящего пакета, например: <see langword="0x0a"/>, <see langword="0x06"/>, <see langword="0x0e"/></param>
-        /// <param name="ProtocolNew">Флаг типа <see cref="bool"/> указывающий на актуальнойть версии протокола ( <see langword="true"/> - Актуальная версия, <see langword="false"/> - Старая версия )</param>
+        /// <param name="_CroppedMessage">Сокращенное входящие сообщение</param>
+        /// <param name="_MessageCount">Цело число, определение под каким номером пуступило входящее сообщение</param>
+        /// <param name="_TypeMessage">Флаг типа <see cref="byte"/> для определения типа запроса и формирования исходящего пакета, например: <see langword="0x0a"/>, <see langword="0x06"/>, <see langword="0x0e"/></param>
+        /// <param name="_ProtocolNew">Флаг типа <see cref="bool"/> указывающий на актуальнойть версии протокола ( <see langword="true"/> - Актуальная версия, <see langword="false"/> - Старая версия )</param>
         /// <returns></returns>
         public byte[] ReturnPacketMessage(byte[] _CroppedMessage, short _MessageCount, byte _TypeMessage, bool _ProtocolNew)
         {
@@ -695,9 +688,7 @@ namespace GuardProtocol
             byte[] _CheckSumm, _InitSizeArray, _ResultSizeArray, _InitMessageCount;
             switch (_TypeMessage)
             {
-                /// <summary>
-                /// Инициализация 0x0c
-                /// </summary>
+                // Инициализация 0x0c
                 case 0x0a:
                     _BufferMessage = new List<byte>(_CroppedMessage.ToArray());
                     _DataMessage =
@@ -732,9 +723,7 @@ namespace GuardProtocol
                     ];//Генерация сообщения
                     PacketMessage = _ResultArray.ToArray();//Результат сгенерированного сообщения
                     break;
-                /// <summary>
-                /// Новое сообщение 0x04
-                /// </summary>
+                // Новое сообщение 0x04
                 case 0x02:
                     _BufferMessage = new List<byte>(_CroppedMessage.ToArray());
                     _DataMessage =
@@ -764,9 +753,7 @@ namespace GuardProtocol
                     ];//Генерация сообщения
                     PacketMessage = _ResultArray.ToArray();//Результат сгенерированного сообщения
                     break;
-                /// <summary>
-                /// Проверка существования открытого соединения 0x08
-                /// </summary>
+                // Проверка существования открытого соединения 0x08
                 case 0x06:
                     _InitMessageCount = BitConverter.GetBytes(_MessageCount);//Конвертация номера сообщения в массив байт
                     _BodyBufferMessage =
@@ -789,9 +776,7 @@ namespace GuardProtocol
                     ];//Генерация сообщения
                     PacketMessage = _ResultArray.ToArray();//Результат сгенерированного сообщения
                     break;
-                /// <summary>
-                /// Таблица интеграции 0x10
-                /// </summary>
+                // Таблица интеграции 0x10
                 case 0x0e:
                     _InitMessageCount = BitConverter.GetBytes(_MessageCount);//Конвертация номера сообщения в массив байт
                     _BodyBufferMessage =
@@ -814,9 +799,7 @@ namespace GuardProtocol
                     ];//Генерация сообщения
                     PacketMessage = _ResultArray.ToArray();//Результат сгенерированного сообщения
                     break;
-                /// <summary>
-                /// Ошибка запроса. ( ошибка CRC, неверная длина пакета ) 0xff
-                /// </summary>
+                // Ошибка запроса. ( ошибка CRC, неверная длина пакета ) 0xff
                 case 0xff:
                     _BodyBufferMessage =
                     [
@@ -847,20 +830,17 @@ namespace GuardProtocol
         /// <summary>
         /// Формирование ответного пакета асинхронно
         /// </summary>
-        /// <param name="CroppedMessage">Сокращенное входящие сообщение</param>
-        /// <param name="MessageCount">Цело число, определение под каким номером пуступило входящее сообщение</param>
-        /// <param name="TypeMessage">Флаг типа <see cref="byte"/> для определения типа запроса и формирования исходящего пакета, например: <see langword="0x0a"/>, <see langword="0x06"/>, <see langword="0x0e"/></param>
-        /// <param name="ProtocolNew">Флаг типа <see cref="bool"/> указывающий на актуальнойть версии протокола ( <see langword="true"/> - Актуальная версия, <see langword="false"/> - Старая версия )</param>
-        /// <returns></returns>
+        /// <param name="_CroppedMessage">Сокращенное входящие сообщение</param>
+        /// <param name="_MessageCount">Цело число, определение под каким номером пуступило входящее сообщение</param>
+        /// <param name="_TypeMessage">Флаг типа <see cref="byte"/> для определения типа запроса и формирования исходящего пакета, например: <see langword="0x0a"/>, <see langword="0x06"/>, <see langword="0x0e"/></param>
+        /// <param name="_ProtocolNew">Флаг типа <see cref="bool"/> указывающий на актуальнойть версии протокола ( <see langword="true"/> - Актуальная версия, <see langword="false"/> - Старая версия )</param>
         public async Task<byte[]> ReturnPacketMessageAsync(byte[] _CroppedMessage, short _MessageCount, byte _TypeMessage, bool _ProtocolNew)
         {
             List<byte> _BufferMessage, _DataMessage, _BodyBufferMessage, _ResultArray;
             byte[] _CheckSumm, _InitSizeArray, _ResultSizeArray, _InitMessageCount;
             switch (_TypeMessage)
             {
-                /// <summary>
-                /// Инициализация 0x0c
-                /// </summary>
+                // Инициализация 0x0c
                 case 0x0a:
                     _BufferMessage = new List<byte>(_CroppedMessage.ToArray());
                     _DataMessage =
@@ -895,9 +875,7 @@ namespace GuardProtocol
                     ];//Генерация сообщения
                     PacketMessage = _ResultArray.ToArray();//Результат сгенерированного сообщения
                     break;
-                /// <summary>
-                /// Новое сообщение 0x04
-                /// </summary>
+                // Новое сообщение 0x04
                 case 0x02:
                     _BufferMessage = new List<byte>(_CroppedMessage.ToArray());
                     _DataMessage =
@@ -927,9 +905,7 @@ namespace GuardProtocol
                     ];//Генерация сообщения
                     PacketMessage = _ResultArray.ToArray();//Результат сгенерированного сообщения
                     break;
-                /// <summary>
-                /// Проверка существования открытого соединения 0x08
-                /// </summary>
+                // Проверка существования открытого соединения 0x08
                 case 0x06:
                     _InitMessageCount = BitConverter.GetBytes(_MessageCount);//Конвертация номера сообщения в массив байт
                     _BodyBufferMessage =
@@ -952,9 +928,7 @@ namespace GuardProtocol
                     ];//Генерация сообщения
                     PacketMessage = _ResultArray.ToArray();//Результат сгенерированного сообщения
                     break;
-                /// <summary>
-                /// Таблица интеграции 0x10
-                /// </summary>
+                // Таблица интеграции 0x10
                 case 0x0e:
                     _InitMessageCount = BitConverter.GetBytes(_MessageCount);//Конвертация номера сообщения в массив байт
                     _BodyBufferMessage =
@@ -977,9 +951,7 @@ namespace GuardProtocol
                     ];//Генерация сообщения
                     PacketMessage = _ResultArray.ToArray();//Результат сгенерированного сообщения
                     break;
-                /// <summary>
-                /// Ошибка запроса. ( ошибка CRC, неверная длина пакета ) 0xff
-                /// </summary>
+                // Ошибка запроса. ( ошибка CRC, неверная длина пакета ) 0xff
                 case 0xff:
                     _BodyBufferMessage =
                     [
@@ -1011,8 +983,6 @@ namespace GuardProtocol
         /// Управление реле асинхронно
         /// </summary>
         /// <param name="Protocol"></param>
-        /// <param name="ObjectNumber"></param>
-        /// <param name="NumberRelay"></param>
         /// <returns></returns>
         public async Task<byte[]> ReturnRelayMessageAsync(bool Protocol)
         {
@@ -1053,8 +1023,6 @@ namespace GuardProtocol
         /// Управление реле
         /// </summary>
         /// <param name="Protocol"></param>
-        /// <param name="ObjectNumber"></param>
-        /// <param name="NumberRelay"></param>
         /// <returns></returns>
         public byte[] ReturnRelayMessage(bool Protocol)
         {
