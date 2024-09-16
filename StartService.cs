@@ -90,10 +90,10 @@ namespace ServiceGuard
             }
             Logger = new Logger(true, settingsService.TypeLog, settingsService.AutoClearLog);
             if (GuardApplication != null && GuardApplication.Listening) { Logger.Info("ServiceGuard.OnStart", "the guard service is running"); return; }
-            Logger.Info("ServiceGuard.OnStart", "initializing guard service");
             try
             {
                 Logger.Info("ServiceGuard.OnStart", "launching the guard service");
+                //Подключение к брокеру
                 ListConnectionClients = [];
                 OpenPort(settingsService.Port).ConfigureAwait(false);
                 using (WorkThreadTCP = new BackgroundWorker())
@@ -116,14 +116,14 @@ namespace ServiceGuard
                     WorkThreadTCP.RunWorkerAsync();
                 }
             }
-            catch (Exception Ex) { Console.ForegroundColor = ConsoleColor.DarkRed; Logger.Fatal("ServiceGuard.OnStart", Ex.Message); Console.ResetColor(); }
+            catch (Exception Ex) { Console.ForegroundColor = ConsoleColor.DarkRed; Logger.Fatal("ServiceGuard.OnStart", Ex.Message); Console.ResetColor(); OnStop(); }
         }
         /// <summary>
         /// Остановка приложения сервера
         /// </summary>
         public void OnStop()
         {
-            if (!GuardApplication.Listening) { Logger.Info("ServiceGuard.OnStop", "the guard service is not running"); return; }
+            if (GuardApplication != null && !GuardApplication.Listening) { Logger.Info("ServiceGuard.OnStop", "the guard service is not running"); return; }
             Logger?.Info("ServiceGuard.OnStop", "stopped guard service");
             if (GuardApplication != null)
             {
@@ -196,7 +196,7 @@ namespace ServiceGuard
         private void GuardApplication_OnConnected(object sender, AsyncServer.ConnectedEventArgs e)
         {
             ListConnectionClients[e.IpPort] = new ClientsParameter() { IpPort = e.IPEndPoint.ToString() };
-            if (e.IPEndPoint.Address.ToString() != "127.0.0.1") Logger.Info("ServiceGuard.GuardApplication_OnConnected", $"the client is connected IP: {e.IpPort}");
+            Logger.Info("ServiceGuard.GuardApplication_OnConnected", $"the client is connected IP: {e.IpPort}");
         }
         /// <summary>
         /// Обработка данных тестового сообщения
